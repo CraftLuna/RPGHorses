@@ -23,7 +23,7 @@ public abstract class NMS
 
 	public void addGlow(ItemMeta meta)
 	{
-		meta.addEnchant(Enchantment.DURABILITY, 3, true);
+		meta.addEnchant(Enchantment.UNBREAKING, 3, true);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 	}
 
@@ -36,7 +36,7 @@ public abstract class NMS
 
 	public void removeGlow(ItemMeta meta)
 	{
-		meta.removeEnchant(Enchantment.DURABILITY);
+		meta.removeEnchant(Enchantment.UNBREAKING);
 		meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
 	}
 

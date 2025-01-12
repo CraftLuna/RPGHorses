@@ -1,10 +1,9 @@
 package org.plugins.rpghorses.utils;
 
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.plugins.rpghorses.AbstractWorldGuard;
-import org.plugins.rpghorses.WorldGuardv6Support;
-import org.plugins.rpghorses.WorldGuardv7Support;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,25 +13,10 @@ import java.util.List;
  */
 public class WorldGuardUtil {
 
-	private static AbstractWorldGuard worldGuard;
+	@Getter
+    private static final AbstractWorldGuard worldGuard = new WGEmpty();
 
-	public static AbstractWorldGuard getWorldGuard() {
-		if (worldGuard == null) {
-			try {
-				Class.forName("com.sk89q.worldguard.WorldGuard");
-				worldGuard = new WorldGuardv7Support();
-			} catch (ClassNotFoundException ignored) {
-				try {
-					worldGuard = new WorldGuardv6Support();
-				} catch (Exception ignored1) {
-				}
-			}
-		}
-
-		return worldGuard;
-	}
-
-	public static String getRPGHorsesPVPFlagName() {
+    public static String getRPGHorsesPVPFlagName() {
 		return "rpghorses-pvp";
 	}
 
@@ -73,4 +57,29 @@ public class WorldGuardUtil {
 		if (!isEnabled()) return;
 		getWorldGuard().createFlags();
 	}
+
+	public static class WGEmpty extends AbstractWorldGuard {
+
+		@Override
+		public List<String> getRegions(Location l) {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public boolean isFlagAllowed(Player player, Location location, String flagName, boolean orNone) {
+			return true;
+		}
+
+		@Override
+		public boolean isFlagDenied(Player player, Location location, String flagName, boolean orNone) {
+			return false;
+		}
+
+		@Override
+		public void createFlags() {
+
+		}
+
+	}
+
 }

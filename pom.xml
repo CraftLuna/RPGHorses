@@ -9,26 +9,8 @@
     <version>1.0.0</version>
     <modules>
         <module>API</module>
-        <module>1_11_2</module>
-        <module>1_12_2</module>
-        <module>1_13_2</module>
-        <module>1_14_4</module>
-        <module>1_15_2</module>
-        <module>1_16_3</module>
-        <module>1_16_4</module>
-        <module>1_16_5</module>
-        <module>1_17</module>
-        <module>1_18_1</module>
-        <module>1_18_2</module>
-        <module>1_19</module>
-        <module>1_19_4</module>
-        <module>1_20</module>
-        <module>1_20_2</module>
-        <module>1_20_4</module>
         <module>1_21</module>
         <module>RPGHorsesPlugin</module>
-        <module>WorldGuard-v6</module>
-        <module>WorldGuard-v7</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -50,6 +32,13 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

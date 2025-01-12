@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
+            <version>1.21.3-R0.1-SNAPSHOT</version>
             <classifier>remapped-mojang</classifier>
             <scope>provided</scope>
         </dependency>
@@ -63,9 +63,9 @@
                         </goals>
                         <id>remap-mojang</id>
                         <configuration>
-                            <srgIn>org.spigotmc:minecraft-server:1.21-R0.1-SNAPSHOT:txt:maps-mojang</srgIn>
+                            <srgIn>org.spigotmc:minecraft-server:1.21.3-R0.1-SNAPSHOT:txt:maps-mojang</srgIn>
                             <reverse>true</reverse>
-                            <remappedDependencies>org.spigotmc:spigot:1.21-R0.1-SNAPSHOT:jar:remapped-mojang
+                            <remappedDependencies>org.spigotmc:spigot:1.21.3-R0.1-SNAPSHOT:jar:remapped-mojang
                             </remappedDependencies>
                             <remappedArtifactAttached>true</remappedArtifactAttached>
                             <remappedClassifierName>remapped-mojang</remappedClassifierName>
@@ -81,8 +81,8 @@
                             <inputFile>
                                 ${project.build.directory}/${project.artifactId}-${project.version}-remapped-mojang.jar
                             </inputFile>
-                            <srgIn>org.spigotmc:minecraft-server:1.21-R0.1-SNAPSHOT:csrg:maps-spigot</srgIn>
-                            <remappedDependencies>org.spigotmc:spigot:1.21-R0.1-SNAPSHOT:jar:remapped-mojang
+                            <srgIn>org.spigotmc:minecraft-server:1.21.3-R0.1-SNAPSHOT:csrg:maps-spigot</srgIn>
+                            <remappedDependencies>org.spigotmc:spigot:1.21.3-R0.1-SNAPSHOT:jar:remapped-mojang
                             </remappedDependencies>
                         </configuration>
                     </execution>

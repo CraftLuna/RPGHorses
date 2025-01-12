@@ -74,8 +74,8 @@ public class RPGHorse {
 		this.horseInfo = AbstractHorseInfo.getFromEntity(entity);
 		this.horse = entity;
 		if (RPGHorsesMain.getVersion().getWeight() >= 9) {
-			this.maxHealth = this.horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-			this.movementSpeed = this.horse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue();
+			this.maxHealth = this.horse.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
+			this.movementSpeed = this.horse.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue();
 		} else {
 			this.maxHealth = this.horse.getMaxHealth();
 		}
@@ -168,7 +168,7 @@ public class RPGHorse {
 			this.maxHealth = maxHealth;
 			if (this.horse != null) {
 				if (RPGHorsesMain.getVersion().getWeight() >= 9) {
-					this.horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.maxHealth);
+					this.horse.getAttribute(Attribute.MAX_HEALTH).setBaseValue(this.maxHealth);
 				} else {
 					this.horse.setMaxHealth(this.maxHealth);
 				}
@@ -181,7 +181,7 @@ public class RPGHorse {
 			this.movementSpeed = newSpeed;
 			if (this.horse != null) {
 				if (RPGHorsesMain.getVersion().getWeight() >= 9) {
-					this.horse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(this.movementSpeed);
+					this.horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(this.movementSpeed);
 				}
 			}
 		}
@@ -308,8 +308,8 @@ public class RPGHorse {
 			}
 
 			if (RPGHorsesMain.getVersion().getWeight() >= 9) {
-				this.horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.maxHealth);
-				this.horse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(this.movementSpeed);
+				this.horse.getAttribute(Attribute.MAX_HEALTH).setBaseValue(this.maxHealth);
+				this.horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(this.movementSpeed);
 			}
 
 			if (this.name != null) {

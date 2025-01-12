@@ -4,7 +4,7 @@ package org.plugins.rpghorses.v1_21;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.plugins.rpghorses.NMS;
@@ -22,7 +22,7 @@ public class NMSHandler extends NMS {
 
 	public NMSHandler() {
 		try {
-			mobGoalsMethod = GoalSelector.class.getDeclaredMethod("b");
+			mobGoalsMethod = GoalSelector.class.getDeclaredMethod("getAvailableGoals");
 			mobGoalsMethod.setAccessible(true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
