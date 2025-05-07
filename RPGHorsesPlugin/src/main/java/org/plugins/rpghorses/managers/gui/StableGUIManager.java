@@ -125,15 +125,7 @@ public class StableGUIManager {
 	}
 	
 	public ItemStack getHorseItem(RPGHorse rpgHorse) {
-		ItemStack item;
-		if (rpgHorse.isInMarket()) {
-			item = marketHorseItem.clone();
-			if (plugin.getConfig().isSet("stable-options.market-horse-item.skin-value") || plugin.getConfig().isSet("stable-options.market-horse-item.textures-url")) {
-				return item;
-			}
-		} else {
-			item = rpgHorse.isDead() ? this.deadHorseItem.clone() : this.aliveHorseItem.clone();
-		}
+		ItemStack item = rpgHorse.isDead() ? this.deadHorseItem.clone() : this.aliveHorseItem.clone();
 
 		return HorseSkins.applySkin(rpgHorse, item);
 	}

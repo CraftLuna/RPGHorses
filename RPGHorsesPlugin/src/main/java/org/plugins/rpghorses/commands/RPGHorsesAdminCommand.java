@@ -17,7 +17,6 @@ import org.plugins.rpghorses.guis.GUILocation;
 import org.plugins.rpghorses.guis.instances.HorseGUI;
 import org.plugins.rpghorses.horseinfo.HorseInfo;
 import org.plugins.rpghorses.horseinfo.LegacyHorseInfo;
-import org.plugins.rpghorses.horses.MarketHorse;
 import org.plugins.rpghorses.horses.RPGHorse;
 import org.plugins.rpghorses.managers.*;
 import org.plugins.rpghorses.managers.gui.*;
@@ -36,27 +35,23 @@ public class RPGHorsesAdminCommand implements CommandExecutor {
 	private final RPGHorseManager rpgHorseManager;
 	private final StableGUIManager stableGuiManager;
 	private final HorseGUIManager horseGUIManager;
-	private final MarketGUIManager marketGUIManager;
 	private final HorseDespawner horseDespawner;
 	private final HorseCrateManager horseCrateManager;
 	private final ParticleManager particleManager;
 	private final SQLManager sqlManager;
 	private final MessageQueuer messageQueuer;
 	private final RPGMessagingUtil messagingUtil;
-	private SellGUIManager sellGUIManager;
 	private TrailGUIManager trailGUIManager;
 
-	public RPGHorsesAdminCommand(RPGHorsesMain plugin, HorseOwnerManager horseOwnerManager, RPGHorseManager rpgHorseManager, StableGUIManager stableGuiManager, HorseGUIManager horseGUIManager, SellGUIManager sellGUIManager, TrailGUIManager trailGUIManager, HorseDespawner horseDespawner, HorseCrateManager horseCrateManager, MarketGUIManager marketGUIManager, ParticleManager particleManager, MessageQueuer messageQueuer, RPGMessagingUtil messagingUtil) {
+	public RPGHorsesAdminCommand(RPGHorsesMain plugin, HorseOwnerManager horseOwnerManager, RPGHorseManager rpgHorseManager, StableGUIManager stableGuiManager, HorseGUIManager horseGUIManager, TrailGUIManager trailGUIManager, HorseDespawner horseDespawner, HorseCrateManager horseCrateManager, ParticleManager particleManager, MessageQueuer messageQueuer, RPGMessagingUtil messagingUtil) {
 		this.plugin = plugin;
 		this.horseOwnerManager = horseOwnerManager;
 		this.rpgHorseManager = rpgHorseManager;
 		this.horseGUIManager = horseGUIManager;
-		this.sellGUIManager = sellGUIManager;
 		this.trailGUIManager = trailGUIManager;
 		this.stableGuiManager = stableGuiManager;
 		this.horseDespawner = horseDespawner;
 		this.horseCrateManager = horseCrateManager;
-		this.marketGUIManager = marketGUIManager;
 		this.particleManager = particleManager;
 		this.sqlManager = plugin.getSQLManager();
 		this.messageQueuer = messageQueuer;
@@ -89,7 +84,6 @@ public class RPGHorsesAdminCommand implements CommandExecutor {
 				this.messagingUtil.reload();
 				this.stableGuiManager.reload();
 				this.horseGUIManager.reload();
-				this.sellGUIManager.reload();
 				this.trailGUIManager.reload();
 				this.horseDespawner.reload();
 				TimeUtil.refreshUnitStrings(this.plugin.getConfig(), "time-options.");
@@ -334,15 +328,6 @@ public class RPGHorsesAdminCommand implements CommandExecutor {
 				}
 				horseOwner.removeRPGHorse(rpgHorse);
 
-				if (rpgHorse.isInMarket()) {
-					MarketHorse marketHorse = marketGUIManager.getMarketHorse(rpgHorse);
-					this.marketGUIManager.removeHorse(marketHorse, true);
-
-					if (sqlManager != null) {
-						sqlManager.removeMarketHorse(marketHorse, true);
-					}
-				}
-
 				String message = this.messagingUtil.placeholders(this.plugin.getConfig().getString("messages.your-horse-was-removed").replace("{PLAYER}", sender.getName()).replace("{HORSE-NUMBER}", horseNumberArg), rpgHorse);
 				if (p.isOnline()) {
 					this.messagingUtil.sendMessage(p.getPlayer(), message);
@@ -384,15 +369,6 @@ public class RPGHorsesAdminCommand implements CommandExecutor {
 						}
 					}
 					horseOwner.removeRPGHorse(rpgHorse);
-
-					if (rpgHorse.isInMarket()) {
-						MarketHorse marketHorse = marketGUIManager.getMarketHorse(rpgHorse);
-						this.marketGUIManager.removeHorse(marketHorse, true);
-
-						if (sqlManager != null) {
-							sqlManager.removeMarketHorse(marketHorse, true);
-						}
-					}
 				}
 
 				String message = this.messagingUtil.placeholders(this.plugin.getConfig().getString("messages.all-your-horses-were-removed").replace("{PLAYER}", sender.getName()).replace("{TOTAL-HORSES}", "" + totalHorses));
@@ -670,17 +646,10 @@ public class RPGHorsesAdminCommand implements CommandExecutor {
 						horseOwner.openStableGUIPage(1);
 					} else if (guiLocation == GUILocation.HORSE_GUI) {
 						horseOwner.openHorseGUI(horseGUI);
-					} else if (guiLocation == GUILocation.SELL_GUI) {
-						horseOwner.openSellGUI(sellGUIManager.createSellGUI(horseGUI));
 					} else if (guiLocation == GUILocation.TRAILS_GUI) {
 						horseOwner.setTrailsGUI(trailGUIManager.setupTrailsGUI(horseGUI));
 						horseOwner.openTrailsGUIPage(horseOwner.getTrailsGUI().getPage(1));
-					} else if (guiLocation == GUILocation.MARKET_GUI) {
-						horseOwner.openMarketGUIPage(marketGUIManager.getPage(1));
 					} else if (guiLocation == GUILocation.YOUR_HORSES_GUI) {
-						if (horseOwner.getYourHorsesGUI() == null || horseOwner.getYourHorsesGUI().getPage(1) == null) {
-							this.marketGUIManager.setupYourHorsesGUI(horseOwner);
-						}
 						horseOwner.openYourHorsesGUIPage(1);
 					}
 

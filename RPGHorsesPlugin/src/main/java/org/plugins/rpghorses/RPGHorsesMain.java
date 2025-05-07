@@ -60,10 +60,8 @@ public class RPGHorsesMain extends JavaPlugin {
 	private HorseDespawner horseDespawner;
 	private HorseOwnerManager horseOwnerManager;
 	private StableGUIManager stableGuiManager;
-	private MarketGUIManager marketGUIManager;
 	private HorseGUIManager horseGUIManager;
 	private TrailGUIManager trailGUIManager;
-	private SellGUIManager sellGUIManager;
 	private HorseCrateManager horseCrateManager;
 	private ParticleManager particleManager;
 	private XPManager xpManager;
@@ -1058,13 +1056,11 @@ public class RPGHorsesMain extends JavaPlugin {
 		this.horseOwnerManager = new HorseOwnerManager(this, this.horseCrateManager, this.playerConfigs);
 		this.rpgHorseManager = new RPGHorseManager(this, this.horseOwnerManager);
 		this.stableGuiManager = new StableGUIManager(this, this.horseOwnerManager, this.rpgHorseManager, this.itemUtil, this.messagingUtil);
-		this.marketGUIManager = new MarketGUIManager(this, this.horseOwnerManager, this.marketConfig, this.itemUtil);
 		this.horseGUIManager = new HorseGUIManager(this, this.horseOwnerManager, this.stableGuiManager);
 		this.messageQueuer = new MessageQueuer(this.playerConfigs, this.messagingUtil);
 		this.horseDespawner = new HorseDespawner(this, this.horseOwnerManager, this.rpgHorseManager);
 		this.particleManager = new ParticleManager(this, this.horseOwnerManager);
 		this.trailGUIManager = new TrailGUIManager(this, particleManager, this.horseOwnerManager);
-		this.sellGUIManager = new SellGUIManager(this, stableGuiManager, this.horseOwnerManager);
 		this.xpManager = new XPManager(this, rpgHorseManager, messagingUtil);
 	}
 
@@ -1073,20 +1069,20 @@ public class RPGHorsesMain extends JavaPlugin {
 		new EntityDamageByEntityListener(this, this.rpgHorseManager, this.stableGuiManager);
 		new EntityDeathListener(this, this.rpgHorseManager, this.stableGuiManager, this.horseOwnerManager, xpManager, messagingUtil);
 		new EntitySpawnListener(this, this.rpgHorseManager, this.horseOwnerManager);
-		new InventoryClickListener(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.marketGUIManager, this.horseGUIManager, this.trailGUIManager, this.sellGUIManager, this.messageQueuer, this.messagingUtil);
+		new InventoryClickListener(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.horseGUIManager, this.trailGUIManager, this.messageQueuer, this.messagingUtil);
 		new InventoryCloseListener(this, this.horseOwnerManager, this.stableGuiManager);
 		new PlayerChatListener(this, this.rpgHorseManager, this.stableGuiManager, this.messagingUtil);
 		new PlayerInteractEntityListener(this, this.rpgHorseManager, this.messagingUtil);
-		new PlayerJoinListener(this, this.horseOwnerManager, this.stableGuiManager, this.marketGUIManager, this.messagingUtil, this.messageQueuer, updateNotifier);
+		new PlayerJoinListener(this, this.horseOwnerManager, this.stableGuiManager, this.messagingUtil, this.messageQueuer, updateNotifier);
 		new PlayerQuitListener(this, this.horseOwnerManager, xpManager);
 		new PlayerTeleportListener(this, this.horseOwnerManager, this.messagingUtil);
-		new PreCommandListener(this, this.rpgHorseManager, this.stableGuiManager, this.marketGUIManager, this.messagingUtil);
+		new PreCommandListener(this, this.rpgHorseManager, this.stableGuiManager, this.messagingUtil);
 		new VehicleListener(this, this.rpgHorseManager, this.xpManager, this.messagingUtil);
 	}
 
 	public void loadCommands() {
-		this.getCommand("rpghorses").setExecutor(new RPGHorsesCommand(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.marketGUIManager, this.horseCrateManager, this.particleManager, this.messagingUtil));
-		this.getCommand("rpghorsesadmin").setExecutor(new RPGHorsesAdminCommand(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.horseGUIManager, this.sellGUIManager, this.trailGUIManager, this.horseDespawner, this.horseCrateManager, this.marketGUIManager, this.particleManager, this.messageQueuer, this.messagingUtil));
+		this.getCommand("rpghorses").setExecutor(new RPGHorsesCommand(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.horseCrateManager, this.particleManager, this.messagingUtil));
+		this.getCommand("rpghorsesadmin").setExecutor(new RPGHorsesAdminCommand(this, this.horseOwnerManager, this.rpgHorseManager, this.stableGuiManager, this.horseGUIManager, this.trailGUIManager, this.horseDespawner, this.horseCrateManager, this.particleManager, this.messageQueuer, this.messagingUtil));
 	}
 
 	public void setupHelpMessage() {
@@ -1124,7 +1120,6 @@ public class RPGHorsesMain extends JavaPlugin {
 		}
 
 		this.horseOwnerManager.saveData();
-		this.marketGUIManager.saveMarketHorses();
 
 		try {
 			if (sqlManager != null) sqlManager.close();

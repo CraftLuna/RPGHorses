@@ -76,11 +76,8 @@ public class RPGHorseManager {
 
 	public void setupValidEntityTypes() {
 		if (plugin.getVersion().getWeight() >= 11) {
-			this.validEntityTypes.add(EntityType.DONKEY);
-			this.validEntityTypes.add(EntityType.MULE);
 			this.validEntityTypes.add(EntityType.SKELETON_HORSE);
 			this.validEntityTypes.add(EntityType.ZOMBIE_HORSE);
-			this.validEntityTypes.add(EntityType.LLAMA);
 		}
 		this.validEntityTypes.add(EntityType.HORSE);
 	}

@@ -203,7 +203,6 @@ public class HorseOwnerManager {
 					config.set(path + "variant", ((LegacyHorseInfo) rpgHorse.getHorseInfo()).getVariant().name());
 				}
 				config.set(path + "death-time", rpgHorse.getDeathTime());
-				config.set(path + "in-market", rpgHorse.isInMarket());
 				if (RPGHorsesMain.getVersion().getWeight() < 9) {
 					Effect effect = ((LegacyHorseInfo) rpgHorse.getHorseInfo()).getEffect();
 					if (effect != null) {

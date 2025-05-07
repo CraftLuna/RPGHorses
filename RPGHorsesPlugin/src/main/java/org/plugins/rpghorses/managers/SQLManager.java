@@ -6,6 +6,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
@@ -17,7 +18,6 @@ import org.plugins.rpghorses.RPGHorsesMain;
 import org.plugins.rpghorses.horseinfo.AbstractHorseInfo;
 import org.plugins.rpghorses.horseinfo.HorseInfo;
 import org.plugins.rpghorses.horseinfo.LegacyHorseInfo;
-import org.plugins.rpghorses.horses.MarketHorse;
 import org.plugins.rpghorses.horses.RPGHorse;
 import org.plugins.rpghorses.players.HorseOwner;
 import org.plugins.rpghorses.utils.BukkitSerialization;
@@ -48,7 +48,6 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 
 	private final String LOAD_PLAYER, SAVE_PLAYER;
 	private final String LOAD_HORSES, GET_HORSE, SAVE_HORSE, DELETE_HORSES, DELETE_HORSE, LOWER_HORSE_IDS;
-	private final String LOAD_MARKET, REMOVE_MARKET_HORSE, ADD_MARKET_HORSE, UPDATE_MARKET_HORSE, LOWER_MARKET_HORSE_IDS, LOWER_MARKET_HORSE_INDEXES;
 
 	public SQLManager(RPGHorsesMain plugin) {
 		super(plugin, "");
@@ -68,17 +67,10 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 
 		LOAD_HORSES = "SELECT * FROM " + HORSE_TABLE + " WHERE owner=? ORDER BY id;";
 		GET_HORSE = "SELECT * FROM " + HORSE_TABLE + " WHERE owner=? AND id=? LIMIT 1;";
-		SAVE_HORSE = "INSERT INTO " + HORSE_TABLE + " (id, owner, name, tier, xp, health, max_health, movement_speed, jump_strength, color, style, type, variant, death_time, in_market, particle, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		SAVE_HORSE = "INSERT INTO " + HORSE_TABLE + " (id, owner, name, tier, xp, health, max_health, movement_speed, jump_strength, color, style, type, variant, death_time, particle, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 		DELETE_HORSES = "DELETE FROM " + HORSE_TABLE + " WHERE owner=?;";
 		DELETE_HORSE = "DELETE FROM " + HORSE_TABLE + " WHERE owner=? AND id=?;";
 		LOWER_HORSE_IDS = "UPDATE " + HORSE_TABLE + " SET id=id-1 WHERE owner=? AND id>?";
-
-		LOAD_MARKET = "SELECT * FROM " + MARKET_TABLE + ";";
-		REMOVE_MARKET_HORSE = "DELETE FROM " + MARKET_TABLE + " WHERE id=?;";
-		UPDATE_MARKET_HORSE = "UPDATE " + HORSE_TABLE + " SET in_market=? WHERE owner=? AND id=?";
-		LOWER_MARKET_HORSE_IDS = "UPDATE " + MARKET_TABLE + " SET id=id-1 WHERE id>?";
-		ADD_MARKET_HORSE = "INSERT INTO " + MARKET_TABLE + "(id, owner, price, horse_index) VALUES (?,?,?,?);";
-		LOWER_MARKET_HORSE_INDEXES = "UPDATE " + MARKET_TABLE + " SET horse_index=horse_index-1 WHERE owner=? AND horse_index>?";
 
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, "BungeeCord", this);
@@ -116,7 +108,7 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 
 	public void createHorseTable() {
 		try (Connection con = getConnection()) {
-			execute(con, "CREATE TABLE IF NOT EXISTS " + HORSE_TABLE + " (id INTEGER NOT NULL, owner VARCHAR(36) NOT NULL, source_crate VARCHAR(64) NOT NULL, name VARCHAR(64) NOT NULL, tier INTEGER DEFAULT 1, xp DOUBLE DEFAULT 0, health DOUBLE NOT NULL, max_health DOUBLE DEFAULT 20, movement_speed DOUBLE NOT NULL, jump_strength DOUBLE NOT NULL, color VARCHAR(16), style VARCHAR(16), type VARCHAR(32), variant VARCHAR(32), death_time BIGINT DEFAULT 0, in_market BOOLEAN DEFAULT 0, particle VARCHAR(32), items TEXT);");
+			execute(con, "CREATE TABLE IF NOT EXISTS " + HORSE_TABLE + " (id INTEGER NOT NULL, owner VARCHAR(36) NOT NULL, source_crate VARCHAR(64) NOT NULL, name VARCHAR(64) NOT NULL, tier INTEGER DEFAULT 1, xp DOUBLE DEFAULT 0, health DOUBLE NOT NULL, max_health DOUBLE DEFAULT 20, movement_speed DOUBLE NOT NULL, jump_strength DOUBLE NOT NULL, color VARCHAR(16), style VARCHAR(16), type VARCHAR(32), variant VARCHAR(32), death_time BIGINT DEFAULT 0, particle VARCHAR(32), items TEXT);");
 
 			execute(con, "ALTER TABLE `" + HORSE_TABLE + "` ADD COLUMN IF NOT EXISTS `max_health` DOUBLE DEFAULT 20 AFTER health;");
 
@@ -170,20 +162,10 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 						UUID owner = UUID.fromString(msgin.readUTF());
 						int index = msgin.readInt();
 
-						Player p = Bukkit.getPlayer(owner);
-						if (p != null && p.isOnline()) {
-							HorseOwner horseOwner = plugin.getHorseOwnerManager().getHorseOwner(p);
-							horseOwner.removeRPGHorse(index);
-							plugin.getStableGuiManager().setupStableGUI(horseOwner);
-						} else {
-							RPGHorse rpgHorse = getHorse(owner, index);
-							MarketHorse marketHorse = plugin.getMarketGUIManager().getMarketHorse(rpgHorse);
-							if (marketHorse != null) {
-								plugin.getMarketGUIManager().removeHorse(marketHorse, true);
-							} else {
-								plugin.getMarketGUIManager().removeHorse(new MarketHorse(-1, rpgHorse, -1, index), true);
-							}
-						}
+						OfflinePlayer p = Bukkit.getOfflinePlayer(owner);
+						HorseOwner horseOwner = plugin.getHorseOwnerManager().getHorseOwner(p);
+						horseOwner.removeRPGHorse(index);
+						plugin.getStableGuiManager().setupStableGUI(horseOwner);
 					} else {
 
 						int id = msgin.readInt();
@@ -200,198 +182,11 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 						} else {
 							rpgHorse = getHorse(owner, index);
 						}
-
-						if (type == MessageType.MARKET_HORSE_ADD) {
-							double price = msgin.readDouble();
-							plugin.getMarketGUIManager().addHorse(rpgHorse, price, index);
-						} else if (type == MessageType.MARKET_HORSE_REMOVE) {
-							boolean horseRemoved = msgin.readBoolean();
-							MarketHorse marketHorse = plugin.getMarketGUIManager().getMarketHorse(rpgHorse);
-							DebugUtil.debug("GOT MARKET HORSE");
-							plugin.getMarketGUIManager().removeHorse(marketHorse, horseRemoved);
-							DebugUtil.debug("REMOVED HORSE FROM MARKET");
-
-							if (horseRemoved && p != null && p.isOnline()) {
-								DebugUtil.debug("REMOVING P HORSE (" + index + ")");
-
-								horseOwner.removeRPGHorse(index, false);
-								plugin.getStableGuiManager().setupStableGUI(horseOwner);
-							}
-						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			});
-		}
-	}
-
-	public List<MarketHorse> loadMarket() {
-		List<MarketHorse> marketHorses = new ArrayList<>();
-
-		try (Connection con = getConnection()) {
-
-			PreparedStatement statement = con.prepareStatement(LOAD_MARKET);
-
-			ResultSet set = statement.executeQuery();
-
-			while (set.next()) {
-				int id = set.getInt("id");
-				UUID owner = UUID.fromString(set.getString("owner"));
-				double price = set.getDouble("price");
-				int index = set.getInt("horse_index");
-
-				RPGHorse rpgHorse;
-				Player p = Bukkit.getPlayer(owner);
-				if (p != null) {
-					rpgHorse = plugin.getHorseOwnerManager().getHorseOwner(p).getRPGHorse(index);
-				} else {
-					rpgHorse = getHorse(owner, index);
-				}
-
-				marketHorses.add(new MarketHorse(id, rpgHorse, price, index));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return marketHorses;
-	}
-
-	public void addMarketHorse(MarketHorse horse) {
-		if (Bukkit.isPrimaryThread() && plugin.isEnabled()) {
-			executorService.execute(() -> addMarketHorse(horse));
-			return;
-		}
-
-		try (Connection con = getConnection()) {
-
-			String owner = horse.getRPGHorse().getHorseOwner().getUUID().toString();
-
-			PreparedStatement statement = con.prepareStatement(ADD_MARKET_HORSE);
-			statement.setInt(1, horse.getId());
-			statement.setString(2, owner);
-			statement.setDouble(3, horse.getPrice());
-			statement.setInt(4, horse.getIndex());
-
-			statement.executeUpdate();
-
-			Player p = horse.getRPGHorse().getHorseOwner().getPlayer();
-			if (p == null || p.isOnline()) {
-				statement = con.prepareStatement(UPDATE_MARKET_HORSE);
-				statement.setBoolean(1, true);
-				statement.setString(2, p.getUniqueId().toString());
-				statement.setInt(3, horse.getRPGHorse().getHorseOwner().getHorseNumber(horse.getRPGHorse()) - 1);
-				statement.executeUpdate();
-			}
-
-			// Send a message to the other servers for them to update
-			ByteArrayDataOutput out = ByteStreams.newDataOutput();
-
-			out.writeUTF("Forward"); // So BungeeCord knows to forward it
-			out.writeUTF("ALL");
-			out.writeUTF("RPGHorses"); // The channel name to check if this your data
-
-			ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-			DataOutputStream msgout = new DataOutputStream(msgbytes);
-			try {
-				msgout.writeUTF(MessageType.MARKET_HORSE_ADD.name());
-				msgout.writeInt(horse.getId());
-				msgout.writeUTF(owner);
-				msgout.writeInt(horse.getIndex());
-				msgout.writeDouble(horse.getPrice());
-			} catch (IOException exception) {
-				exception.printStackTrace();
-			}
-
-			out.writeShort(msgbytes.toByteArray().length);
-			out.write(msgbytes.toByteArray());
-
-			Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-			player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void removeMarketHorse(MarketHorse marketHorse, boolean removedHorse) {
-		if (Bukkit.isPrimaryThread() && plugin.isEnabled()) {
-			executorService.execute(() -> removeMarketHorse(marketHorse, removedHorse));
-			return;
-		}
-
-		String ownerStr = marketHorse.getRPGHorse().getHorseOwner().getUUID().toString();
-
-		try (Connection con = getConnection()) {
-
-			int id = marketHorse.getId();
-			DebugUtil.debug("REMOVE MARKET HORSE: " + ownerStr);
-
-			PreparedStatement statement = con.prepareStatement(REMOVE_MARKET_HORSE);
-			statement.setInt(1, id);
-			statement.executeUpdate();
-
-			statement = con.prepareStatement(LOWER_MARKET_HORSE_IDS);
-			statement.setInt(1, id);
-			statement.executeUpdate();
-
-			if (removedHorse) {
-				Player p = Bukkit.getPlayer(UUID.fromString(ownerStr));
-				if (p == null || !p.isOnline()) {
-					statement = con.prepareStatement(DELETE_HORSE);
-					statement.setString(1, ownerStr);
-					statement.setInt(2, marketHorse.getIndex());
-					statement.executeUpdate();
-
-					statement = con.prepareStatement(LOWER_HORSE_IDS);
-					statement.setString(1, ownerStr);
-					statement.setInt(2, marketHorse.getIndex());
-					statement.executeUpdate();
-				}
-
-				statement = con.prepareStatement(LOWER_MARKET_HORSE_INDEXES);
-				statement.setString(1, ownerStr);
-				statement.setInt(2, marketHorse.getIndex());
-				statement.executeUpdate();
-			} else {
-				Player p = marketHorse.getRPGHorse().getHorseOwner().getPlayer();
-				if (p == null || p.isOnline()) {
-					statement = con.prepareStatement(UPDATE_MARKET_HORSE);
-					statement.setBoolean(1, false);
-					statement.setString(2, ownerStr);
-					statement.setInt(3, marketHorse.getIndex());
-					statement.executeUpdate();
-				}
-			}
-
-			// TODO: Plugin messaging
-			ByteArrayDataOutput out = ByteStreams.newDataOutput();
-
-			out.writeUTF("Forward"); // So BungeeCord knows to forward it
-			out.writeUTF("ALL");
-			out.writeUTF("RPGHorses"); // The channel name to check if this your data
-
-			ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-			DataOutputStream msgout = new DataOutputStream(msgbytes);
-			try {
-				msgout.writeUTF(MessageType.MARKET_HORSE_REMOVE.name());
-				msgout.writeInt(id);
-				msgout.writeUTF(ownerStr);
-				msgout.writeInt(marketHorse.getIndex());
-				msgout.writeBoolean(removedHorse);
-			} catch (IOException exception) {
-				exception.printStackTrace();
-			}
-
-			out.writeShort(msgbytes.toByteArray().length);
-			out.write(msgbytes.toByteArray());
-
-			Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-			player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
-
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -703,8 +498,6 @@ public class SQLManager extends roryslibrary.managers.SQLManager implements Plug
 
 			Long deathTime = horse.getDeathTime();
 			statement.setLong(13, deathTime == null ? 0L : deathTime);
-
-			statement.setBoolean(14, horse.isInMarket());
 
 			String particle = "";
 			if (plugin.getVersion().getWeight() < 9) {

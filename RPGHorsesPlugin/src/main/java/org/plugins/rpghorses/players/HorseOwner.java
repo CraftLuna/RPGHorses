@@ -8,7 +8,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.plugins.rpghorses.RPGHorsesMain;
 import org.plugins.rpghorses.guis.GUILocation;
 import org.plugins.rpghorses.guis.instances.*;
@@ -36,13 +35,11 @@ public class HorseOwner {
 	private Location lastHorseLocation;
 	private StableGUI stableGUI;
 	private StableGUIPage stableGUIPage;
-	private MarketGUIPage marketGUIPage;
 	private YourHorsesGUI yourHorsesGUI;
 	private YourHorsesGUIPage yourHorsesGUIPage;
 	private HorseGUI horseGUI;
 	private TrailsGUI trailsGUI;
 	private TrailsGUIPage trailsGUIPage;
-	private SellGUI sellGUI;
 
 	public HorseOwner(Player p) {
 		this(p.getUniqueId());
@@ -255,23 +252,6 @@ public class HorseOwner {
 		return this.yourHorsesGUIPage;
 	}
 
-	public void openMarketGUIPage(MarketGUIPage marketGUIPage) {
-		if (marketGUIPage != null) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					getPlayer().openInventory(marketGUIPage.getGUI());
-					guiLocation = GUILocation.MARKET_GUI;
-				}
-			}.runTask(RPGHorsesMain.getInstance());
-			this.marketGUIPage = marketGUIPage;
-		}
-	}
-
-	public MarketGUIPage getCurrentMarketGUIPage() {
-		return marketGUIPage;
-	}
-
 	public void openHorseGUI(HorseGUI horseGUI) {
 		this.horseGUI = horseGUI;
 		getPlayer().openInventory(horseGUI.getInventory());
@@ -298,12 +278,6 @@ public class HorseOwner {
 				}
 			}
 		}
-	}
-
-	public void openSellGUI(SellGUI sellGUI) {
-		this.sellGUI = sellGUI;
-		getPlayer().openInventory(sellGUI.getInventory());
-		setGUILocation(GUILocation.SELL_GUI);
 	}
 
 	public GUILocation getGUILocation() {
@@ -357,8 +331,6 @@ public class HorseOwner {
 		} else if (rpgHorse.isDead()) {
 			String timeLeft = TimeUtil.formatTime((long) Math.ceil(plugin.getStableGuiManager().getDeathDifferent(rpgHorse) / 1000D));
 			messagingUtil.sendMessageAtPath(p, "messages.horse-is-dead", rpgHorse, "TIME-LEFT", timeLeft);
-		} else if (rpgHorse.isInMarket()) {
-			messagingUtil.sendMessageAtPath(p, "messages.horse-is-in-market", rpgHorse);
 		} else {
 			if (getCurrentHorse() != null) {
 				for (String cmd : plugin.getConfig().getStringList("command-options.on-despawn")) {

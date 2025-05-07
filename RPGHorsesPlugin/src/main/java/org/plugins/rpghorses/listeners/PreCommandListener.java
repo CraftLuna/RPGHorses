@@ -6,11 +6,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.plugins.rpghorses.RPGHorsesMain;
-import org.plugins.rpghorses.horses.MarketHorse;
 import org.plugins.rpghorses.horses.RPGHorse;
 import org.plugins.rpghorses.managers.RPGHorseManager;
 import org.plugins.rpghorses.managers.SQLManager;
-import org.plugins.rpghorses.managers.gui.MarketGUIManager;
 import org.plugins.rpghorses.managers.gui.StableGUIManager;
 import org.plugins.rpghorses.players.HorseOwner;
 import org.plugins.rpghorses.players.RemoveHorseConfirmation;
@@ -22,15 +20,13 @@ public class PreCommandListener implements Listener {
 	private final RPGHorsesMain plugin;
 	private final RPGHorseManager rpgHorseManager;
 	private final StableGUIManager stableGuiManager;
-	private final MarketGUIManager marketGUIManager;
 	private final SQLManager sqlManager;
 	private final RPGMessagingUtil messagingUtil;
 	
-	public PreCommandListener(RPGHorsesMain plugin, RPGHorseManager rpgHorseManager, StableGUIManager stableGuiManager, MarketGUIManager marketGUIManager, RPGMessagingUtil messagingUtil) {
+	public PreCommandListener(RPGHorsesMain plugin, RPGHorseManager rpgHorseManager, StableGUIManager stableGuiManager, RPGMessagingUtil messagingUtil) {
 		this.plugin = plugin;
 		this.rpgHorseManager = rpgHorseManager;
 		this.stableGuiManager = stableGuiManager;
-		this.marketGUIManager = marketGUIManager;
 		this.sqlManager = plugin.getSQLManager();
 		this.messagingUtil = messagingUtil;
 		
@@ -52,18 +48,6 @@ public class PreCommandListener implements Listener {
 					for (String cmd : this.plugin.getConfig().getStringList("command-options.on-despawn")) {
 						Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), MessagingUtil.format(cmd.replace("{PLAYER}", p.getName())));
 					}
-				}
-				
-				if (rpgHorse.isInMarket()) {
-					MarketHorse marketHorse = marketGUIManager.getMarketHorse(rpgHorse);
-					
-					this.marketGUIManager.removeHorse(marketHorse, true);
-					
-					if (sqlManager != null) {
-						sqlManager.removeMarketHorse(marketHorse, true);
-					}
-				} else {
-					this.marketGUIManager.registerDelete(rpgHorse);
 				}
 				
 				horseOwner.removeRPGHorse(rpgHorse);

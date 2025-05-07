@@ -30,6 +30,10 @@
             <url>https://repo.codemc.io/repository/maven-snapshots/</url>
         </repository>
         <repository>
+            <id>codemc-nms-repository</id>
+            <url>https://repo.codemc.io/repository/nms/</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -98,7 +102,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.plugins.roryslibrary</groupId>
+            <groupId>org.plugins.rpghorses</groupId>
             <artifactId>RorysLibrary</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>

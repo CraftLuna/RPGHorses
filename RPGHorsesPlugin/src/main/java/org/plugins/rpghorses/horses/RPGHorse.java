@@ -36,7 +36,7 @@ public class RPGHorse {
 	private double xp = 0, health = 0, maxHealth = 20, movementSpeed = 1.0, jumpStrength = 1.0;
 	private AbstractHorseInfo horseInfo;
 	private HashMap<Integer, ItemStack> items = new HashMap<>();
-	private boolean dead, inMarket, gainedXP;
+	private boolean dead, gainedXP;
 	private Long deathTime;
 	private Particle particle;
 
@@ -55,7 +55,6 @@ public class RPGHorse {
 		this.setJumpStrength(jumpStrength);
 		this.setHealth(health);
 		this.setMaxHealth(Math.max(health, maxHealth));
-		this.setInMarket(inMarket);
 		this.setParticle(particle);
 		this.items.put(0, new ItemStack(Material.SADDLE));
 		setItems(this.items);
@@ -87,7 +86,6 @@ public class RPGHorse {
 			this.setJumpStrength(((Horse) this.horse).getJumpStrength());
 		}
 		this.setHealth(entity.getHealth());
-		this.setInMarket(false);
 		this.setParticle(null);
 		Inventory inventory = ((InventoryHolder) this.horse).getInventory();
 
